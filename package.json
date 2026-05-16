@@ -1,0 +1,10 @@
+{
+  "name": "orchestrator-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-cloudflare.mjs",
+    "dev": "node orchestrator-demo-server.mjs"
+  }
+}

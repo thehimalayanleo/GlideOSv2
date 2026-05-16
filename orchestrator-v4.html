@@ -583,10 +583,10 @@ button{min-height:34px}
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sh-guest">Demo Keys</div>
-    <div class="settings-copy">For quick local demos, paste keys here. For a deployed demo, set server environment variables instead: <strong>OPENAI_API_KEY</strong> and <strong>ELEVENLABS_API_KEY</strong>.</div>
+    <div class="settings-copy">For quick local demos, paste keys here. For a deployed demo, set server environment variables instead: <strong>ANTHROPIC_API_KEY</strong> and <strong>ELEVENLABS_API_KEY</strong>.</div>
     <div class="settings-row">
-      <label for="settings-openai">OpenAI API key</label>
-      <input class="settings-input" id="settings-openai" type="password" autocomplete="off" placeholder="Optional if the server has OPENAI_API_KEY">
+      <label for="settings-anthropic">Anthropic API key</label>
+      <input class="settings-input" id="settings-anthropic" type="password" autocomplete="off" placeholder="Optional if the server has ANTHROPIC_API_KEY">
       <div class="settings-help">Used only for new-guest inference through the demo server.</div>
     </div>
     <div class="settings-row">
@@ -793,20 +793,20 @@ let countdownInterval = null;
 let autoCheckInterval = null;
 
 // ═══ KEYS / DEMO API ════════════════════════════════════════════════════════
-function openAIKey(){ return localStorage.getItem('orch-openai') || ''; }
+function anthropicKey(){ return localStorage.getItem('orch-anthropic') || localStorage.getItem('orch-openai') || ''; }
 function elKey(){  return localStorage.getItem('orch-el')  || ''; }
 function elevenVoiceId(){ return localStorage.getItem('orch-eleven-voice') || '21m00Tcm4TlvDq8ikWAM'; }
-function ensureOpenAI(){ let k=openAIKey(); if(!k){openSettings();} return k; }
+function ensureAnthropic(){ let k=anthropicKey(); if(!k){openSettings();} return k; }
 function ensureEl(){ let k=elKey(); if(!k){openSettings();} return k; }
 
 function openSettings(){
   const ov = document.getElementById('settings-ov');
   if(!ov) return;
-  const openai = document.getElementById('settings-openai');
+  const anthropic = document.getElementById('settings-anthropic');
   const eleven = document.getElementById('settings-eleven');
   const voice = document.getElementById('settings-voice');
   const status = document.getElementById('settings-status');
-  if(openai) openai.value = openAIKey();
+  if(anthropic) anthropic.value = anthropicKey();
   if(eleven) eleven.value = elKey();
   if(voice) voice.value = elevenVoiceId();
   if(status) status.textContent = location.protocol === 'file:' ? 'Tip: run the demo server for safer voice proxying. File mode uses the browser key directly.' : 'Server mode can use saved browser keys or environment variables.';
@@ -817,16 +817,18 @@ function closeSettings(evt){
   document.getElementById('settings-ov').classList.remove('show');
 }
 function saveSettings(){
-  const openai = document.getElementById('settings-openai').value.trim();
+  const anthropic = document.getElementById('settings-anthropic').value.trim();
   const eleven = document.getElementById('settings-eleven').value.trim();
   const voice = document.getElementById('settings-voice').value.trim();
-  if(openai) localStorage.setItem('orch-openai', openai); else localStorage.removeItem('orch-openai');
+  if(anthropic) localStorage.setItem('orch-anthropic', anthropic); else localStorage.removeItem('orch-anthropic');
+  localStorage.removeItem('orch-openai');
   if(eleven) localStorage.setItem('orch-el', eleven); else localStorage.removeItem('orch-el');
   if(voice) localStorage.setItem('orch-eleven-voice', voice); else localStorage.removeItem('orch-eleven-voice');
   const status = document.getElementById('settings-status');
   if(status) status.textContent = 'Saved locally for this browser.';
 }
 function clearSettings(){
+  localStorage.removeItem('orch-anthropic');
   localStorage.removeItem('orch-openai');
   localStorage.removeItem('orch-el');
   localStorage.removeItem('orch-eleven-voice');
@@ -835,10 +837,10 @@ function clearSettings(){
   if(status) status.textContent = 'Local keys cleared.';
 }
 
-async function generateTouchpointsWithChatGPT(prompt){
+async function generateTouchpointsWithAI(prompt){
   const headers = {'Content-Type':'application/json'};
-  const browserKey = openAIKey();
-  if(browserKey) headers['x-openai-key'] = browserKey;
+  const browserKey = anthropicKey();
+  if(browserKey) headers['x-anthropic-key'] = browserKey;
   const res = await fetch('/api/generate-touchpoints', {
     method:'POST',
     headers,
@@ -846,7 +848,7 @@ async function generateTouchpointsWithChatGPT(prompt){
   });
   if(!res.ok){
     const msg = await res.text().catch(()=>'');
-    throw new Error(msg || `OpenAI proxy ${res.status}`);
+    throw new Error(msg || `Inference proxy ${res.status}`);
   }
   return res.json();
 }
@@ -3019,7 +3021,7 @@ Respond ONLY in valid JSON:
 {"days":[{"day_index":0,"touchpoints":[{"time":"15:00","source":"Concierge","text":"Expected: ...","prediction":"Based on ...","action":"→ ...","trainingCtx":"The principle is ...","placemakerRef":null}]}]}`;
   const srcMap={Concierge:'s-concierge',Spa:'s-spa',Restaurant:'s-restaurant',Housekeeping:'s-housekeeping',Valet:'s-valet'};
   try{
-    const parsed = await generateTouchpointsWithChatGPT(prompt);
+    const parsed = await generateTouchpointsWithAI(prompt);
     if(agent||obs){
       days[0].touchpoints.unshift({id:uid(),type:'past',time:'Arrival',source:agent?'Agent':'Concierge',sourceClass:agent?'s-agent':'s-concierge',text:agent?'Pre-arrival note received.':'Arrival observation.',anecdote:agent||obs||null,note:null,tags:['arrival'],trainingCtx:null,placemakerRef:null,evolved:false});
     }
