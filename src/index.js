@@ -17,8 +17,8 @@ export default {
 async function handleVoiceover(request, env) {
   const body = await request.json().catch(() => ({}));
   const text = String(body.text || '').trim();
-  const voiceId = body.voiceId || env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM';
-  const key = env.ELEVENLABS_API_KEY;
+  const voiceId = String(body.voiceId || env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM').trim();
+  const key = String(env.ELEVENLABS_API_KEY || '').trim();
 
   if (!key) return textResponse('Missing ELEVENLABS_API_KEY in Cloudflare Variables and Secrets.', 400);
   if (!text) return textResponse('Missing voiceover text.', 400);

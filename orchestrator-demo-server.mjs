@@ -179,10 +179,10 @@ async function handleGenerate(req, res) {
 }
 
 async function callElevenLabs(text, voiceId, key) {
-  const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}`, {
+  const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(String(voiceId).trim())}`, {
     method: 'POST',
     headers: {
-      'xi-api-key': key,
+      'xi-api-key': String(key || '').trim(),
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -208,7 +208,7 @@ async function handleVoiceover(req, res) {
     text = '',
     voiceId = process.env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM',
   } = JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
-  const key = req.headers['x-elevenlabs-key'] || process.env.ELEVENLABS_API_KEY;
+  const key = String(req.headers['x-elevenlabs-key'] || process.env.ELEVENLABS_API_KEY || '').trim();
 
   if (!key) {
     res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' });

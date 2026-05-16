@@ -794,8 +794,8 @@ let autoCheckInterval = null;
 
 // ═══ KEYS / DEMO API ════════════════════════════════════════════════════════
 function anthropicKey(){ return localStorage.getItem('orch-anthropic') || localStorage.getItem('orch-openai') || ''; }
-function elKey(){  return localStorage.getItem('orch-el')  || ''; }
-function elevenVoiceId(){ return localStorage.getItem('orch-eleven-voice') || '21m00Tcm4TlvDq8ikWAM'; }
+function elKey(){  return (localStorage.getItem('orch-el')  || '').trim(); }
+function elevenVoiceId(){ return (localStorage.getItem('orch-eleven-voice') || '21m00Tcm4TlvDq8ikWAM').trim(); }
 function ensureAnthropic(){ let k=anthropicKey(); if(!k){openSettings();} return k; }
 function ensureEl(){ let k=elKey(); if(!k){openSettings();} return k; }
 
