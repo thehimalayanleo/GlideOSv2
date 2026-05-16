@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build-cloudflare.mjs",
+    "deploy:pages": "npm run build && npx wrangler pages deploy dist --project-name glideos",
     "dev": "node orchestrator-demo-server.mjs"
   }
 }
