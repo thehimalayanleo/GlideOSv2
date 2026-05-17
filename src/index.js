@@ -10,6 +10,18 @@ export default {
       return handleGenerateTouchpoints(request, env);
     }
 
+    if (request.method === 'GET' && url.pathname === '/api/debug-env') {
+      return jsonResponse({
+        build: 'voice-debug-2026-05-16',
+        hasElevenLabsKey: !!String(env.ELEVENLABS_API_KEY || '').trim(),
+        elevenLabsKeyLength: String(env.ELEVENLABS_API_KEY || '').trim().length,
+        elevenLabsKeyPrefix: String(env.ELEVENLABS_API_KEY || '').trim().slice(0, 4),
+        hasAnthropicKey: !!String(env.ANTHROPIC_API_KEY || '').trim(),
+        hasVoiceId: !!String(env.ELEVENLABS_VOICE_ID || '').trim(),
+        voiceId: String(env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM').trim(),
+      });
+    }
+
     return env.ASSETS.fetch(request);
   },
 };
